@@ -3,10 +3,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useTransition, useCallback, useEffect } from 'react';
 
-export default function ServicesClient({ result, stats, page, search, filter }: any) {
+export default function ServicesClient({ result, stats, page, search, filter, role }: any) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [q, setQ] = useState(search);
+  const isAdmin = role === 'admin';
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [localServices, setLocalServices] = useState(result.data);
   const [localStats, setLocalStats] = useState(stats);
@@ -67,22 +68,22 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
           <p className="page-sub">{total} service{total !== 1 ? 's' : ''} tracked</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <Link href="/services/bulk-upload" className="btn btn-secondary">⬆ Bulk Upload</Link>
-          <Link href="/services/add" className="btn btn-primary">+ Add Service</Link>
+          {isAdmin && <Link href="/services/bulk-upload" className="btn btn-secondary">⬆ Bulk Upload</Link>}
+          {isAdmin && <Link href="/services/add" className="btn btn-primary">+ Add Service</Link>}
         </div>
       </div>
 
       {/* Alerts */}
-      {success && <div className="alert alert-success animate-in" style={{ marginBottom: 16 }}>✅ {success}</div>}
+      {success  && <div className="alert alert-success animate-in" style={{ marginBottom: 16 }}>✅ {success}</div>}
       {errorMsg && <div className="alert alert-error   animate-in" style={{ marginBottom: 16 }}>⚠️ {errorMsg} <button onClick={() => setErrorMsg('')} style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>×</button></div>}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 22 }}>
         {[
-          { label: 'Total', value: localStats.total, color: 'var(--text)', bg: 'var(--surface)', f: 'all' },
-          { label: 'Active', value: localStats.active, color: '#059669', bg: '#f0fdf4', f: 'active' },
-          { label: 'Expiring', value: localStats.expiring, color: '#d97706', bg: '#fffbeb', f: 'expiring' },
-          { label: 'Expired', value: localStats.expired, color: '#dc2626', bg: '#fef2f2', f: 'expired' },
+          { label: 'Total',    value: localStats.total,    color: 'var(--text)',  bg: 'var(--surface)', f: 'all'      },
+          { label: 'Active',   value: localStats.active,   color: '#059669',      bg: '#f0fdf4',        f: 'active'   },
+          { label: 'Expiring', value: localStats.expiring, color: '#d97706',      bg: '#fffbeb',        f: 'expiring' },
+          { label: 'Expired',  value: localStats.expired,  color: '#dc2626',      bg: '#fef2f2',        f: 'expired'  },
         ].map(s => (
           <div key={s.label} className="card stat-card"
             style={{ background: s.bg, cursor: 'pointer', transition: 'all .15s', borderLeft: filter === s.f ? `3px solid ${s.color}` : '3px solid transparent' }}
@@ -112,7 +113,7 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
           )}
         </form>
         <div style={{ display: 'flex', gap: 4 }}>
-          {[['all', 'All'], ['active', 'Active'], ['expiring', 'Expiring'], ['expired', 'Expired']].map(([f, l]) => (
+          {[['all','All'],['active','Active'],['expiring','Expiring'],['expired','Expired']].map(([f, l]) => (
             <button key={f} onClick={() => go({ filter: f, page: '1' })} style={{
               padding: '6px 14px', borderRadius: 7, fontSize: 12, fontWeight: 500,
               cursor: 'pointer', border: '1px solid',
@@ -154,7 +155,7 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
                 const isDeleting = deletingId === id;
                 return (
                   <tr key={id} style={{ opacity: isDeleting ? .3 : 1, transition: 'opacity .2s', pointerEvents: isDeleting ? 'none' : 'auto' }}>
-                    <td style={{ color: 'var(--text3)', fontSize: 12 }}>{(page - 1) * 20 + i + 1}</td>
+                    <td style={{ color: 'var(--text3)', fontSize: 12 }}>{(page-1)*20+i+1}</td>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{s.name}</div>
                       {s.website && (
@@ -171,7 +172,7 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
                     <td>
                       {s.expiry_date ? (
                         <span style={{ fontWeight: 700, fontSize: 13, color: daysColor(s.days_left) }}>
-                       {isNaN(s.days_left) || !s.expiry_date ? '—' : s.days_left < 0 ? `${Math.abs(s.days_left)}d ago` : s.days_left === 0 ? 'TODAY!' : `${s.days_left}d`}
+                          {s.days_left < 0 ? `${Math.abs(s.days_left)}d ago` : s.days_left === 0 ? 'TODAY!' : `${s.days_left}d`}
                         </span>
                       ) : '—'}
                     </td>
@@ -182,14 +183,14 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
                     <td>
                       <div style={{ display: 'flex', gap: 5 }}>
                         <Link href={`/services/${id}`} className="btn btn-ghost btn-sm">View</Link>
-                        <Link href={`/services/${id}/edit`} className="btn btn-secondary btn-sm">Edit</Link>
-                        <button
+                        {isAdmin && <Link href={`/services/${id}/edit`} className="btn btn-secondary btn-sm">Edit</Link>}
+                        {isAdmin && <button
                           className="btn btn-danger btn-sm"
                           disabled={isDeleting}
                           onClick={() => handleDelete(id, s.name)}
                         >
                           {isDeleting ? '⏳' : 'Del'}
-                        </button>
+                        </button>}
                       </div>
                     </td>
                   </tr>
@@ -201,17 +202,17 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
       </div>
 
       {/* Pagination */}
-{result.totalPages > 1 && (
+      {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text2)' }}>
-            Showing {Math.min((page - 1) * 20 + 1, total)}–{Math.min(page * 20, total)} of {total}
+            Showing {Math.min((page-1)*20+1, total)}–{Math.min(page*20, total)} of {total}
           </span>
           <div style={{ display: 'flex', gap: 4 }}>
-            <button className="btn btn-secondary btn-sm" disabled={page <= 1} onClick={() => go({ page: String(page - 1) })}>← Prev</button>
+            <button className="btn btn-secondary btn-sm" disabled={page<=1} onClick={() => go({ page: String(page-1) })}>← Prev</button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const p = i + 1;
+              const p = Math.max(1, Math.min(page-2+i, totalPages-4+i));
               return (
-                <button key={`pg-${p}`} onClick={() => go({ page: String(p) })} style={{
+                <button key={p} onClick={() => go({ page: String(p) })} style={{
                   padding: '5px 10px', borderRadius: 7, fontSize: 12, fontWeight: 500,
                   cursor: 'pointer', border: '1px solid',
                   background: p === page ? 'var(--brand)' : 'var(--surface)',
@@ -220,7 +221,7 @@ export default function ServicesClient({ result, stats, page, search, filter }: 
                 }}>{p}</button>
               );
             })}
-            <button className="btn btn-secondary btn-sm" disabled={page >= totalPages} onClick={() => go({ page: String(page + 1) })}>Next →</button>
+            <button className="btn btn-secondary btn-sm" disabled={page>=totalPages} onClick={() => go({ page: String(page+1) })}>Next →</button>
           </div>
         </div>
       )}

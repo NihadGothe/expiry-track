@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV = [
-  { href: '/services',      icon: '🗂️',  label: 'Services'       },
-  { href: '/notifications', icon: '🔔',  label: 'Alert History'  },
-  { href: '/users',         icon: '👥',  label: 'Users'          },
-  { href: '/settings',      icon: '⚙️',  label: 'Settings'       },
+  { href: '/services',      icon: '🗂️',  label: 'Services',       adminOnly: false },
+  { href: '/notifications', icon: '🔔',  label: 'Alert History',  adminOnly: false },
+  { href: '/users',         icon: '👥',  label: 'Users',          adminOnly: true  },
+  { href: '/settings',      icon: '⚙️',  label: 'Settings',       adminOnly: true  },
 ];
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
 
 export default function Sidebar({ user, open, onClose }: Props) {
   const path = usePathname();
+  const isAdmin = user?.role === 'admin';
 
   return (
     <>
@@ -45,7 +46,7 @@ export default function Sidebar({ user, open, onClose }: Props) {
         {/* Nav */}
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           <div className="nav-section-label">Main</div>
-          {NAV.map(n => (
+          {NAV.filter(n => !n.adminOnly || isAdmin).map(n => (
             <Link key={n.href} href={n.href} onClick={onClose}
               className={`nav-item ${path.startsWith(n.href) ? 'active' : ''}`}>
               <span className="nav-icon">{n.icon}</span>

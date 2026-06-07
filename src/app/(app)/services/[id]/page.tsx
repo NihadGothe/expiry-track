@@ -1,9 +1,12 @@
 import { getService } from '@/lib/db';
+import { getSession } from '@/lib/auth';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 export default async function ViewServicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await getSession();
+  const isAdmin = (session as any)?.role === 'admin';
   const s = await getService(id);
   if (!s) notFound();
 
@@ -28,7 +31,7 @@ export default async function ViewServicePage({ params }: { params: Promise<{ id
             </div>
           </div>
         </div>
-        <Link href={`/services/${id}/edit`} className="btn btn-primary">Edit Service</Link>
+        {isAdmin && <Link href={`/services/${id}/edit`} className="btn btn-primary">Edit Service</Link>}
       </div>
 
       <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16 }}>
