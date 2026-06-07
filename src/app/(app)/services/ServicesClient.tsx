@@ -141,6 +141,7 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
                 <th style={{ width: 36 }}>#</th>
                 <th>Service</th>
                 <th className="hide-mobile">Type</th>
+                <th className="hide-mobile">Purchase Date</th>
                 <th>Vendor</th>
                 <th>Expiry</th>
                 <th>Days Left</th>
@@ -167,6 +168,9 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
                       )}
                     </td>
                     <td className="hide-mobile"><span className="chip">{s.type || '—'}</span></td>
+                    <td className="hide-mobile" style={{ fontSize: 13, color: 'var(--text2)' }}>
+                      {s.purchase_date || '—'}
+                    </td>
                     <td style={{ color: 'var(--text2)', fontSize: 13 }}>{s.vendor || '—'}</td>
                     <td style={{ fontSize: 13, fontWeight: 500 }}>{s.expiry_date || '—'}</td>
                     <td>
