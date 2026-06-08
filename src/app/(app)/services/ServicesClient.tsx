@@ -60,8 +60,14 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
     d < 0 ? '#dc2626' : d <= 7 ? '#dc2626' : d <= 15 ? '#d97706' : d <= 30 ? '#ca8a04' : '#059669';
 
 
-  async function exportToExcel() {
-  const r = await fetch(`/api/services?limit=1000&filter=${filter}&search=${search}`);
+async function exportToExcel() {
+  const params = new URLSearchParams({
+    limit: '1000',
+    page: '1',
+    filter: filter || 'all',
+    search: search || '',
+  });
+  const r = await fetch(`/api/services?${params.toString()}`);
   const d = await r.json();
   const rows = d.data || [];
 
@@ -80,7 +86,7 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `expirytrack-${filter}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `expirytrack-${filter || 'all'}-${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

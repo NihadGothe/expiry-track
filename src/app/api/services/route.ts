@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getAllServices, createService } from '@/lib/db';
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  return NextResponse.json(await getAllServices());
+  const { searchParams } = req.nextUrl;
+  const page   = Number(searchParams.get('page')   || 1);
+  const limit  = Number(searchParams.get('limit')  || 20);
+  const search = searchParams.get('search') || '';
+  const filter = searchParams.get('filter') || 'all';
+  return NextResponse.json(await getAllServices(page, limit, search, filter));
 }
 export async function POST(req: NextRequest) {
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
