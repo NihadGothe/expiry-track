@@ -85,6 +85,45 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
   URL.revokeObjectURL(url);
 }
 
+async function handleDuplicate(s: any) {
+  const id = s._id || s.id;
+  const duplicate = {
+    name: s.name + ' (copy ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ')',
+    type: s.type,
+    vendor: s.vendor,
+    expiry_date: s.expiry_date,
+    purchase_date: s.purchase_date,
+    cost: s.cost,
+    currency: s.currency,
+    card: s.card,
+    card_expiry: s.card_expiry,
+    frequency: s.frequency,
+    renew: s.renew,
+    auto_renewal: s.auto_renewal,
+    notes: s.notes,
+    remarks: s.remarks,
+    website: s.website,
+    account_num: s.account_num,
+    username: s.username,
+    password: s.password,
+    registered_email: s.registered_email,
+    notify_30: s.notify_30,
+    notify_15: s.notify_15,
+    notify_7: s.notify_7,
+    notify_1: s.notify_1,
+  };
+  const r = await fetch('/api/services', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(duplicate),
+  });
+  if (r.ok) {
+    setSuccess(`"${s.name}" duplicated — edit the copy to update the name`);
+    setTimeout(() => setSuccess(''), 4000);
+    startTransition(() => router.refresh());
+  }
+}
+
   return (
     <>
       {/* Header */}
@@ -224,6 +263,7 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
                         >
                           {isDeleting ? '⏳' : 'Del'}
                         </button>}
+                        <button className="btn btn-ghost btn-sm" onClick={() => handleDuplicate(s)} title="Duplicate">⧉</button>
                       </div>
                     </td>
                   </tr>
