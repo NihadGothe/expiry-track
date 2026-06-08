@@ -56,12 +56,16 @@ export async function getAllServices(page = 1, limit = 20, search = '', filter =
   let filtered = all;
   if (search) {
     const q = search.toLowerCase();
-    filtered = all.filter((s:any) =>
-      (s.name||'').toLowerCase().includes(q) ||
-      (s.vendor||'').toLowerCase().includes(q) ||
-      (s.type||'').toLowerCase().includes(q) ||
-      (s.registered_email||'').toLowerCase().includes(q)
-    );
+filtered = all.filter((s:any) =>
+  (s.name||'').toLowerCase().includes(q) ||
+  (s.vendor||'').toLowerCase().includes(q) ||
+  (s.type||'').toLowerCase().includes(q) ||
+  (s.registered_email||'').toLowerCase().includes(q) ||
+  (s.notes||'').toLowerCase().includes(q) ||
+  (s.remarks||'').toLowerCase().includes(q) ||
+  (s.account_num||'').toLowerCase().includes(q) ||
+  (s.website||'').toLowerCase().includes(q)
+);
   }
   if (filter !== 'all') filtered = filtered.filter((s:any) => s.status === filter);
   const total = filtered.length;
