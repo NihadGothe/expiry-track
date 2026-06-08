@@ -59,6 +59,32 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
   const daysColor = (d: number) =>
     d < 0 ? '#dc2626' : d <= 7 ? '#dc2626' : d <= 15 ? '#d97706' : d <= 30 ? '#ca8a04' : '#059669';
 
+
+  async function exportToExcel() {
+  const r = await fetch(`/api/services?limit=1000&filter=${filter}&search=${search}`);
+  const d = await r.json();
+  const rows = d.data || [];
+
+  const headers = ['#','Service','Type','Vendor','Purchase Date','Expiry Date','Days Left','Cost','Currency','Card Expiry','Status','Website','Notes','Remarks'];
+  const data = rows.map((s: any, i: number) => [
+    i+1, s.name, s.type, s.vendor||'', s.purchase_date||'',
+    s.expiry_date||'', s.days_left, s.cost||'', s.currency||'',
+    s.card_expiry||'', s.status, s.website||'', s.notes||'', s.remarks||''
+  ]);
+
+  const csvContent = [headers, ...data]
+    .map(row => row.map((v: any) => `"${String(v).replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `expirytrack-${filter}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
   return (
     <>
       {/* Header */}
@@ -68,8 +94,9 @@ export default function ServicesClient({ result, stats, page, search, filter, ro
           <p className="page-sub">{total} service{total !== 1 ? 's' : ''} tracked</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          {isAdmin && <Link href="/services/bulk-upload" className="btn btn-secondary">⬆ Bulk Upload</Link>}
-          {isAdmin && <Link href="/services/add" className="btn btn-primary">+ Add Service</Link>}
+          <Link href="/services/bulk-upload" className="btn btn-secondary">⬆ Bulk Upload</Link>
+          <button className="btn btn-secondary" onClick={exportToExcel}>⬇ Export CSV</button>
+          <Link href="/services/add" className="btn btn-primary">+ Add Service</Link>
         </div>
       </div>
 
