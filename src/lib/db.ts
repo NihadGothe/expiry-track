@@ -52,7 +52,11 @@ function enrich(s: any) {
 // ─── Services ────────────────────────────────────────────────────────────────
 export async function getAllServices(page = 1, limit = 20, search = '', filter = 'all') {
   await seed();
-  const all = (await db.services.find({}).sort({ expiry_date: 1 })).map(enrich);
+  // const all = (await db.services.find({}).sort({ expiry_date: 1 })).map(enrich);
+  const all = (await db.services.find({}).sort({ expiry_date: 1 })).map(enrich).sort((a: any, b: any) => {
+  const order: any = { expired: 0, expiring: 1, active: 2, cancelled: 3 };
+  return (order[a.status] ?? 2) - (order[b.status] ?? 2);
+});
   let filtered = all;
   if (search) {
     const q = search.toLowerCase();
