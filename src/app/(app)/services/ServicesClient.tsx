@@ -282,18 +282,21 @@ async function handleDuplicate(s: any) {
           </span>
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="btn btn-secondary btn-sm" disabled={page<=1} onClick={() => go({ page: String(page-1) })}>← Prev</button>
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const p = Math.max(1, Math.min(page-2+i, totalPages-4+i));
-              return (
-                <button key={p} onClick={() => go({ page: String(p) })} style={{
-                  padding: '5px 10px', borderRadius: 7, fontSize: 12, fontWeight: 500,
-                  cursor: 'pointer', border: '1px solid',
-                  background: p === page ? 'var(--brand)' : 'var(--surface)',
-                  color: p === page ? '#fff' : 'var(--text2)',
-                  borderColor: p === page ? 'var(--brand)' : 'var(--border)',
-                }}>{p}</button>
-              );
-            })}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let start = Math.max(1, page - 2);
+                if (start + 4 > totalPages) start = Math.max(1, totalPages - 4);
+                const p = start + i;
+                if (p > totalPages) return null;
+                return (
+                  <button key={`page-btn-${p}`} onClick={() => go({ page: String(p) })} style={{
+                    padding: '5px 10px', borderRadius: 7, fontSize: 12, fontWeight: 500,
+                    cursor: 'pointer', border: '1px solid',
+                    background: p === page ? 'var(--brand)' : 'var(--surface)',
+                    color: p === page ? '#fff' : 'var(--text2)',
+                    borderColor: p === page ? 'var(--brand)' : 'var(--border)',
+                  }}>{p}</button>
+                );
+              })}
             <button className="btn btn-secondary btn-sm" disabled={page>=totalPages} onClick={() => go({ page: String(page+1) })}>Next →</button>
           </div>
         </div>
