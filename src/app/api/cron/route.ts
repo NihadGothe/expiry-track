@@ -27,7 +27,10 @@ export async function GET(req: NextRequest) {
 
   for (const svc of services) {
     for (const { days, key } of INTERVALS) {
-      if (svc.days_left > days || svc.days_left < days - 1) continue;
+      if (svc.days_left > days) continue;
+      const prevInterval = INTERVALS.find(i => i.days < days);
+      const lowerBound = prevInterval ? prevInterval.days + 1 : 0;
+      if (svc.days_left < lowerBound) continue;
       if (!svc[key]) { skipped.push(`${svc.name} (disabled)`); continue; }
       if (await wasAlertSent(svc._id || svc.id, days)) { skipped.push(`${svc.name} (already sent)`); continue; }
 
